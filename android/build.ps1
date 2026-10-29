@@ -17,7 +17,7 @@ $sources=@(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'app\src\main\java
 Invoke-Checked (Join-Path $JavaHome 'bin\javac.exe') (@('--release','11','-encoding','UTF-8','-classpath',$platform,'-d',(Join-Path $stage 'classes'))+$sources)
 Invoke-Checked (Join-Path $JavaHome 'bin\jar.exe') @('cf',(Join-Path $stage 'classes.jar'),'-C',(Join-Path $stage 'classes'),'.')
 Invoke-Checked (Join-Path $JavaHome 'bin\java.exe') @('-cp',(Join-Path $buildTools 'lib\d8.jar'),'com.android.tools.r8.D8','--release','--min-api','30','--lib',$platform,'--output',(Join-Path $stage 'dex'),(Join-Path $stage 'classes.jar'))
-Add-Type -AssemblyName System.IO.Compression.FileSystem
+Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 $zip=[IO.Compression.ZipFile]::Open((Join-Path $stage 'base.apk'),[IO.Compression.ZipArchiveMode]::Update)
 try{Get-ChildItem -LiteralPath (Join-Path $stage 'dex') -Filter '*.dex' | ForEach-Object {[IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$_.FullName,$_.Name,[IO.Compression.CompressionLevel]::Optimal) | Out-Null}}finally{$zip.Dispose()}
 Invoke-Checked (Join-Path $buildTools 'zipalign.exe') @('-f','-p','4',(Join-Path $stage 'base.apk'),(Join-Path $stage 'aligned.apk'))
