@@ -1,0 +1,3 @@
+-keep class com.lightcontrol.MainActivity { *; }
+-keep class com.lightcontrol.DeviceControls { *; }
+-keep class com.lightcontrol.Routines { *; }

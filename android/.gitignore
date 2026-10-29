@@ -1,0 +1,15 @@
+/tools/
+/out/
+/.gradle/
+/local.properties
+/app/build/
+tests/
+test.ps1
+test-device.ps1
+*.lck
+*.apk
+*.idsig
+*.p12
+*.keystore
+*.jks
+*.log
