@@ -14,7 +14,15 @@ final class Hub {
     void changed();
   }
 
+  static final String LAN_PERMISSION = "android.permission.ACCESS_LOCAL_NETWORK";
+  static final String LAN_REQUIRED = "Toque aqui para permitir acesso à rede local";
   private static volatile Hub instance;
+
+  static boolean hasLanPermission(Context context) {
+    return Build.VERSION.SDK_INT < 37
+        || context.checkSelfPermission(LAN_PERMISSION)
+            == android.content.pm.PackageManager.PERMISSION_GRANTED;
+  }
 
   static Hub get(Context c) {
     if (instance == null)
@@ -156,7 +164,12 @@ final class Hub {
     }
   }
 
+  private void requireLanPermission() {
+    if (!hasLanPermission(context)) throw new SecurityException(LAN_REQUIRED);
+  }
+
   private boolean connect() throws Exception {
+    requireLanPermission();
     if (client != null && online) return true;
     message = "Conectando à lâmpada…";
     notifyState();
@@ -179,7 +192,7 @@ final class Hub {
     disconnect();
     message =
         e instanceof SecurityException
-            ? "Permita acesso à rede local em Ajustes"
+            ? LAN_REQUIRED
             : e instanceof javax.crypto.AEADBadTagException
                 ? "Chave local inválida ou mensagem rejeitada"
                 : e.getMessage() == null ? "Falha na conexão local" : e.getMessage();
@@ -476,6 +489,7 @@ final class Hub {
     io.execute(
         () -> {
           try {
+            requireLanPermission();
             message = "Procurando na rede local…";
             notifyState();
             JSONObject c = store.credentials();

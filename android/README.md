@@ -52,7 +52,7 @@ Requisitos: Windows, PowerShell 7.2+, JDK 17+ e acesso à internet para obter as
 .\android\build.ps1
 ```
 
-`build.ps1` usa `javac`, `aapt2`, D8, zipalign e apksigner do SDK. A saída é `dist\LightControl-Android.apk`, sem código de testes. Também existe um projeto Gradle para abrir no Android Studio (AGP 8.13, Gradle 8.13, compile/target SDK 36, min SDK 30).
+`build.ps1` usa `javac`, `aapt2`, D8, zipalign e apksigner do SDK. A saída é `dist\LightControl-Android.apk`, sem código de testes. Também existe um projeto Gradle para abrir no Android Studio (AGP 8.13, Gradle 8.13, compile SDK 36, target SDK 37, min SDK 30).
 
 O SDK isolado fica em `android/tools/sdk`; um SDK convencional pode ser passado por `-SdkRoot`. As ferramentas de desenvolvimento não são distribuídas no APK. O APK gerado usa uma assinatura local de desenvolvimento, armazenada em `android/tools/development-signing.p12`, e não habilita `debuggable`. Preserve a chave para atualizar uma instalação existente. Para outra assinatura:
 
@@ -61,7 +61,7 @@ $env:LIGHTCONTROL_KEYSTORE_PASSWORD = 'senha-da-sua-chave'
 .\android\build.ps1 -KeyStore 'caminho\release.p12' -KeyAlias 'seu-alias'
 ```
 
-A permissão `INTERNET` é necessária para sockets LAN mesmo sem nuvem. O manifesto declara a permissão de rede local para evolução da plataforma; o pedido em runtime está condicionado ao Android e target SDK 37 ou superior. Esta compilação tem target 36.
+A permissão `INTERNET` é necessária para sockets LAN mesmo sem nuvem. No Android 17 ou superior, permita o acesso à rede local quando o aplicativo solicitar. Se a permissão estiver bloqueada, toque no aviso do app e habilite a permissão nas configurações do Android.
 
 ## Validação e Integridade
 

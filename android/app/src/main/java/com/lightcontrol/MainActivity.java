@@ -46,11 +46,34 @@ public final class MainActivity extends Activity implements Hub.Listener {
     if (state != null) page = state.getString("page", "Luz");
     createRoot();
     showPage(page);
-    if (Build.VERSION.SDK_INT >= 37
-        && getApplicationInfo().targetSdkVersion >= 37
-        && checkSelfPermission("android.permission.ACCESS_LOCAL_NETWORK")
-            != android.content.pm.PackageManager.PERMISSION_GRANTED)
-      requestPermissions(new String[] {"android.permission.ACCESS_LOCAL_NETWORK"}, 70);
+    if (state == null && !Hub.hasLanPermission(this)) requestLanPermission(false);
+  }
+
+  private void requestLanPermission(boolean fromUser) {
+    if (Hub.hasLanPermission(this)) {
+      hub.refresh();
+      return;
+    }
+    if (fromUser) {
+      startActivity(
+          new Intent(
+              Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+              android.net.Uri.fromParts("package", getPackageName(), null)));
+      return;
+    }
+    requestPermissions(new String[] {Hub.LAN_PERMISSION}, 70);
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+    super.onRequestPermissionsResult(requestCode, permissions, results);
+    if (requestCode == 70) hub.reconnect();
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    if (Hub.hasLanPermission(this) && Hub.LAN_REQUIRED.equals(hub.message)) hub.reconnect();
   }
 
   @Override
@@ -207,7 +230,7 @@ public final class MainActivity extends Activity implements Hub.Listener {
     status = text("Conectando à lâmpada…", 11, MUTED);
     status.setPadding(dp(24), dp(10), dp(24), dp(12));
     status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-    status.setOnClickListener(v -> hub.refresh());
+    status.setOnClickListener(v -> requestLanPermission(true));
     root.addView(status);
   }
 
@@ -1195,6 +1218,8 @@ public final class MainActivity extends Activity implements Hub.Listener {
             }),
         8);
     LinearLayout connection = card();
+    if (!Hub.hasLanPermission(this))
+      add(connection, button("Permitir rede local", () -> requestLanPermission(true)), 8);
     connection.addView(text("Conexão local", 20, TEXT));
     EditText
         ip =
