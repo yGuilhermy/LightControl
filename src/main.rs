@@ -1,9 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod crypto;
-mod model;
-mod protocol;
-mod store;
+use lightcontrol::{model, protocol, store};
+
 mod ui;
 mod validation;
 mod worker;

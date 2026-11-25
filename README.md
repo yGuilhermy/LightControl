@@ -8,6 +8,75 @@ Sem nuvem, sem telemetria, sem WebView e sem runtime pesado. Apenas conexões di
 
 ---
 
+## Instalação no Windows
+
+Baixe [install.ps1 na página de releases](https://github.com/yGuilhermy/LightControl/releases/latest). No PowerShell, execute o script na pasta onde baixou:
+
+```powershell
+.\install.ps1              # Instala apenas a CLI e adiciona lightcontrol ao PATH
+.\install.ps1 -Mode Both   # Instala CLI e aplicativo visual
+.\install.ps1 -Mode Desktop  # Instala só o aplicativo visual
+```
+
+A instalação é por usuário e verifica o SHA-256 dos arquivos. Se o comando não aparecer no terminal, abra uma sessão nova. A versão visual também está disponível como `LightControl.exe` portátil na release.
+
+## CLI
+
+```powershell
+lightcontrol -h
+lightcontrol config show
+lightcontrol status
+lightcontrol brightness 50
+lightcontrol temperature 30
+lightcontrol color FF8800
+lightcontrol preset list
+lightcontrol preset apply Leitura
+lightcontrol scene list
+lightcontrol timer 20
+lightcontrol off
+lightcontrol --json status
+```
+
+A CLI e o aplicativo visual usam o mesmo perfil em `%LOCALAPPDATA%\LightControl`. Se você já configurou a lâmpada no aplicativo visual, use `lightcontrol status` para verificar a conexão. Você pode usar `--data-dir` antes do comando para carregar outro perfil.
+
+Para cadastrar pelo terminal, use as variáveis `$lampIp` e `$deviceId` preenchidas com os dados da sua lâmpada. O prompt mascara a chave e ela chega ao programa pelo pipe.
+
+```powershell
+$secret = Read-Host 'Chave local Tuya' -AsSecureString
+try {
+    [Net.NetworkCredential]::new('', $secret).Password |
+        lightcontrol config set --ip $lampIp --id $deviceId --key-stdin
+} finally {
+    $secret.Dispose()
+}
+```
+
+O cadastro autentica a lâmpada antes de salvar a credencial com o DPAPI do Windows. Use `lightcontrol config discover` para buscar um novo IP pelo anúncio Tuya, ou `lightcontrol config set --ip $lampIp` para atualizar manualmente. `config import-manager <arquivo>` aceita um módulo Tuya já existente.
+
+Brilho, temperatura e cor usam o estado da lâmpada e mantêm a energia atual. Presets e cenas podem ligar a luz. O timer e Não perturbe dependem do suporte da lâmpada. A CLI executa cada comando e encerra, incluindo quando somente ela está instalada. Se o firmware limitar conexões simultâneas, feche o outro controlador.
+
+## MCP
+
+Em um cliente MCP com transporte local `stdio`, configure o executável instalado com o argumento `mcp`. Exemplo para clientes com `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "lightcontrol": {
+      "command": "lightcontrol",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+Se o cliente não herdar o PATH, use o caminho absoluto retornado por `(Get-Command lightcontrol.exe).Source` como `command` e escape as barras invertidas no JSON. Use o mesmo usuário Windows que cadastrou a credencial.
+
+O servidor negocia MCP via JSON-RPC/stdio e aceita as versões 2025-11-25, 2025-06-18, 2025-03-26 e 2024-11-05. O cliente pode listar e chamar ferramentas para consultar e controlar a luz, aplicar presets e cenas, descobrir a lâmpada ou alterar seu nome e IP. A chave é cadastrada pela CLI ou no aplicativo visual e fica fora dos argumentos, respostas e esquemas do MCP.
+
+## Android
+
+Instale o [APK da release](https://github.com/yGuilhermy/LightControl/releases/latest), configure a lâmpada em Ajustes e permita o acesso à rede local no Android 17 ou superior. O Device Control oferece energia e brilho. Veja o [guia Android](android/README.md) para importar a credencial do PC.
 ## Destaques
 
 - **100% Local (LAN):** Comunicação TCP direta na porta 6668 usando protocolo Tuya 3.5 com criptografia CNG/AES-GCM. Não depende de internet nem de servidores externos.
@@ -85,7 +154,7 @@ Sem nuvem, sem telemetria, sem WebView e sem runtime pesado. Apenas conexões di
 .\build.ps1 -Test
 ```
 
-O executável final é gerado em `dist\LightControl.exe`.
+A compilação gera `dist\LightControl.exe` e `dist\LightControl-CLI.exe`. Para compilar só a CLI, use `cargo build --release --bin lightcontrol`.
 
 Para iniciar rapidamente em modo de desenvolvimento:
 ```cmd

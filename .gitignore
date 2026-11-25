@@ -45,3 +45,12 @@ Desktop.ini
 .DS_Store
 .gemini/
 .antigravity/
+
+.env
+.env.*
+*.pem
+*.key
+*.kdbx
+*.sqlite
+*.sqlite3
+*.db

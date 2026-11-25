@@ -17,11 +17,13 @@ if ($Test) {
     cargo build --release
     if ($LASTEXITCODE -eq 0) {
         New-Item -ItemType Directory -Force -Path "$PSScriptRoot\dist" | Out-Null
+        Copy-Item -LiteralPath "$PSScriptRoot\target\release\lightcontrol.exe" -Destination "$PSScriptRoot\dist\LightControl-CLI.exe" -Force
+        Write-Output 'Pronto: dist\LightControl-CLI.exe'
         try {
-            Copy-Item -LiteralPath "$PSScriptRoot\target\release\lightcontrol.exe" -Destination "$PSScriptRoot\dist\LightControl.exe" -Force
+            Copy-Item -LiteralPath "$PSScriptRoot\target\release\lightcontrol-gui.exe" -Destination "$PSScriptRoot\dist\LightControl.exe" -Force
             Write-Output 'Pronto: dist\LightControl.exe'
         } catch {
-            Write-Warning "Nao foi possivel atualizar dist\LightControl.exe (o arquivo pode estar em execucao). O binario foi gerado em target\release\lightcontrol.exe."
+            Write-Warning "Nao foi possivel atualizar dist\LightControl.exe (o arquivo pode estar em execucao). O binario foi gerado em target\release\lightcontrol-gui.exe."
         }
     }
 }

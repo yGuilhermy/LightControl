@@ -1,9 +1,19 @@
 [package]
 name = "lightcontrol"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
+default-run = "lightcontrol-gui"
+autobins = false
 description = "Controle nativo e local de iluminação Tuya para Windows"
 license = "MIT"
+
+[[bin]]
+name = "lightcontrol"
+path = "src/bin/lightcontrol-cli.rs"
+
+[[bin]]
+name = "lightcontrol-gui"
+path = "src/main.rs"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
